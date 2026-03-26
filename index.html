@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#1a1510">
+<title>היומן שלי</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  /* ── Warm dark brown/beige palette ── */
+  --bg:      #1a1510;   /* deep espresso */
+  --s1:      #221c14;   /* dark walnut */
+  --s2:      #2a2218;   /* medium walnut */
+  --s3:      #342b1f;   /* lighter walnut */
+  --s4:      #3e3226;   /* warm surface */
+  --border:  #453929;
+  --border2: #5a4a35;
+
+  /* Accent — warm amber/gold */
+  --acc:     #c8955a;   /* warm amber */
+  --acc2:    #daa96e;   /* lighter amber */
+  --acc3:    #ead4a8;   /* soft cream */
+
+  /* Text */
+  --t1:      #ede4d6;   /* warm cream */
+  --t2:      #9e8c78;   /* warm mid */
+  --t3:      #5e5040;   /* warm muted */
+
+  /* Category dots — all warm-toned */
+  --cwork:   #7ba3c8;   /* dusty blue */
+  --cpers:   #c87b8a;   /* dusty rose */
+  --chealth: #7ab87a;   /* sage green */
+  --cfin:    #c8a558;   /* warm gold */
+  --clearn:  #c87a58;   /* terracotta */
+
+  /* Status */
+  --red:     #c86060;
+  --yellow:  --cfin;
+  --green:   #6ab06a;
+  --ryellow: #c8a558;
+
+  --r:   14px;
+  --rs:  9px;
+  --nav: 62px;
+}
+
+* { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+html { height: 100%; }
+
+body {
+  font-family: 'Heebo', -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--t1);
+  height: 100%;
+  overflow: hidden;
+  /* Subtle warm texture */
+  background-image: radial-gradient(ellipse at 20% 0%, rgba(200,149,90,0.06) 0%, transparent 60%),
+                    radial-gradient(ellipse at 80% 100%, rgba(200,120,88,0.04) 0%, transparent 50%);
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ── Top bar ── */
+.tb {
+  height: 58px;
+  padding: 0 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--s1);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  z-index: 20;
+}
+.tb-left { display:flex; flex-direction:column; gap:1px; }
+.tb-title { font-size:17px; font-weight:700; color:var(--t1); letter-spacing:-0.2px; }
+.tb-sub { font-size:11px; color:var(--t3); font-weight:400; }
+.tb-add {
+  width:36px; height:36px; border-radius:10px;
+  background: var(--acc); border:none; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  font-size:22px; color:#fff; font-weight:300; line-height:1;
+  box-shadow: 0 2px 12px rgba(200,149,90,0.4);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.tb-add:active { transform:scale(0.92); box-shadow:none; }
+
+/* ── Content ── */
+.content {
+  flex:1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding: 14px 14px calc(var(--nav) + 14px);
+}
+
+/* ── Bottom nav ── */
+.nav {
+  height: var(--nav);
+  background: var(--s1);
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-shrink: 0;
+  z-index: 20;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.ni {
+  flex:1; display:flex; flex-direction:column; align-items:center;
+  justify-content:center; gap:3px; border:none; background:none;
+  color:var(--t3); cursor:pointer; font-family:inherit;
+  transition: color 0.18s; padding:8px 2px;
+  -webkit-user-select:none; user-select:none;
+}
+.ni.on { color:var(--acc2); }
+.ni-ico { font-size:21px; line-height:1; }
+.ni-lbl { font-size:10px; font-weight:600; }
+
+/* ── Views ── */
+.view { display:none; }
+.view.on { display:block; }
+
+/* ── Card ── */
+.card {
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 16px;
+  margin-bottom: 12px;
+}
+.card-hd {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:12px;
+}
+.card-ttl {
+  font-size:10px; font-weight:800; color:var(--t3);
+  text-transform:uppercase; letter-spacing:1px;
+}
+.card-link { font-size:12px; color:var(--acc); cursor:pointer; font-weight:600; }
+
+/* ── Stats ── */
+.stats {
+  display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:12px;
+}
+.stat {
+  background:var(--s1); border:1px solid var(--border); border-radius:var(--r);
+  padding:13px 8px; text-align:center;
+}
+.stat-n { font-size:22px; font-weight:800; line-height:1.1; }
+.stat-l { font-size:10px; color:var(--t3); margin-top:3px; font-weight:600; }
+
+/* ── Greeting ── */
+.greet {
+  font-size:20px; font-weight:700; margin-bottom:14px; color:var(--t1);
+  display:flex; align-items:center; gap:8px;
+}
+.greet-icon { font-size:26px; }
+
+/* ── Timeline ── */
+.tl { display:flex; flex-direction:column; }
+.tl-row {
+  display:flex; align-items:flex-start; gap:10px;
+  padding:11px 0; border-bottom:1px solid var(--border);
+}
+.tl-row:last-child { border-bottom:none; padding-bottom:0; }
+.tl-time { font-size:11px; font-weight:700; color:var(--t3); width:40px; flex-shrink:0; padding-top:3px; }
+.tl-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; margin-top:5px; }
+.tl-info { flex:1; min-width:0; }
+.tl-name { font-size:14px; font-weight:600; }
+.tl-desc { font-size:12px; color:var(--t2); margin-top:2px; }
+.tl-badge { font-size:10px; font-weight:700; padding:2px 8px; border-radius:20px; flex-shrink:0; margin-top:2px; align-self:flex-start; }
+
+/* ── Task row (mini) ── */
+.tr {
+  display:flex; align-items:center; gap:11px;
+  padding:10px 0; border-bottom:1px solid var(--border); cursor:pointer;
+}
+.tr:last-child { border-bottom:none; padding-bottom:0; }
+.tr.done .tr-name { text-decoration:line-through; color:var(--t3); }
+.chk {
+  width:22px; height:22px; border-radius:7px;
+  border:2px solid var(--border2); flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  transition:all 0.18s; background:transparent;
+  cursor:pointer;
+}
+.chk.on { background:var(--acc); border-color:var(--acc); }
+.chk.on::after { content:'✓'; font-size:13px; color:#fff; font-weight:800; }
+.tr-name { font-size:14px; flex:1; min-width:0; }
+.tr-prio { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+
+/* ── Full task card ── */
+.tf {
+  display:flex; align-items:center; gap:12px;
+  padding:13px 15px; border-radius:var(--r);
+  background:var(--s1); border:1px solid var(--border);
+  margin-bottom:7px; cursor:pointer; transition:border-color 0.15s;
+}
+.tf:active { border-color:var(--acc); }
+.tf.done { opacity:0.48; }
+.tf.done .tf-name { text-decoration:line-through; }
+.tf-name { font-size:14px; font-weight:500; flex:1; min-width:0; }
+.tf-meta { display:flex; align-items:center; gap:7px; }
+.tf-tag { font-size:10px; font-weight:700; padding:2px 8px; border-radius:20px; }
+.tf-del {
+  background:none; border:none; color:var(--t3); font-size:20px;
+  cursor:pointer; padding:0 2px; line-height:1; flex-shrink:0;
+}
+
+/* ── Quick add ── */
+.qbar {
+  display:flex; align-items:center; gap:10px;
+  background:var(--s1); border:1px solid var(--border);
+  border-radius:var(--r); padding:12px 15px; margin-bottom:12px;
+}
+.qi {
+  flex:1; background:transparent; border:none; outline:none;
+  font-family:inherit; font-size:15px; color:var(--t1);
+}
+.qi::placeholder { color:var(--t3); }
+
+/* ── Filters ── */
+.chips {
+  display:flex; gap:7px; overflow-x:auto; margin-bottom:12px;
+  padding-bottom:2px; scrollbar-width:none;
+}
+.chips::-webkit-scrollbar { display:none; }
+.chip {
+  white-space:nowrap; padding:7px 14px; border-radius:20px;
+  font-size:12px; font-weight:700; cursor:pointer; flex-shrink:0;
+  background:var(--s2); border:1px solid var(--border); color:var(--t2);
+  transition:all 0.15s; -webkit-user-select:none; user-select:none;
+}
+.chip.on { background:rgba(200,149,90,0.15); border-color:var(--acc); color:var(--acc3); }
+
+/* ── Calendar ── */
+.cal-nav-row {
+  display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;
+}
+.cal-m { font-size:17px; font-weight:700; }
+.cal-btn {
+  background:var(--s2); border:1px solid var(--border);
+  color:var(--t1); width:32px; height:32px; border-radius:var(--rs);
+  font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center;
+  font-weight:700; transition:background 0.15s;
+}
+.cal-btn:active { background:var(--s3); }
+.cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:3px; }
+.cal-dn { text-align:center; font-size:11px; font-weight:700; color:var(--t3); padding:6px 2px; }
+.cal-d {
+  aspect-ratio:1; display:flex; flex-direction:column; align-items:center;
+  justify-content:center; border-radius:var(--rs); font-size:13px; font-weight:500;
+  cursor:pointer; gap:2px; transition:background 0.15s;
+  -webkit-user-select:none; user-select:none;
+}
+.cal-d:active { background:var(--s3); }
+.cal-d.o { color:var(--t3); }
+.cal-d.t { background:rgba(200,149,90,0.14); color:var(--acc3); font-weight:800; }
+.cal-d.s { background:var(--acc); color:#fff; font-weight:800; border-radius:var(--rs); }
+.cdots { display:flex; gap:2px; }
+.cdot { width:4px; height:4px; border-radius:50%; }
+
+/* ── Habit card ── */
+.hcard {
+  display:flex; align-items:center; gap:14px;
+  padding:15px; background:var(--s1); border:1px solid var(--border);
+  border-radius:var(--r); margin-bottom:8px; cursor:pointer; transition:border-color 0.18s;
+}
+.hcard.dn { border-color:var(--green); background:rgba(106,176,106,0.06); }
+.hcard:active { border-color:var(--acc); }
+.hcard-emo { font-size:28px; line-height:1; }
+.hcard-info { flex:1; min-width:0; }
+.hcard-name { font-size:15px; font-weight:700; margin-bottom:3px; }
+.hcard-streak { font-size:12px; color:var(--t3); }
+.hcard-streak b { color:var(--acc2); }
+.hdays { display:flex; gap:4px; margin-top:8px; }
+.hday {
+  width:26px; height:26px; border-radius:7px;
+  font-size:10px; font-weight:700;
+  display:flex; align-items:center; justify-content:center;
+  background:var(--s2); color:var(--t3);
+}
+.hday.dn { background:var(--green); color:#fff; }
+.hday.td { border:2px solid var(--acc); }
+
+/* ── Goal card ── */
+.gcard {
+  background:var(--s1); border:1px solid var(--border);
+  border-radius:var(--r); padding:17px; margin-bottom:10px;
+}
+.gcard-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+.gcard-emo { font-size:26px; }
+.gcard-pct { font-size:20px; font-weight:800; color:var(--acc3); }
+.gcard-title { font-size:16px; font-weight:700; margin-bottom:4px; }
+.gcard-sub { font-size:13px; color:var(--t2); margin-bottom:14px; }
+.prog { height:6px; background:var(--s3); border-radius:3px; overflow:hidden; }
+.prog-f { height:100%; border-radius:3px; transition:width 0.7s cubic-bezier(.4,0,.2,1); }
+
+/* ── Notes ── */
+.note-i {
+  background:var(--s1); border:1px solid var(--border);
+  border-radius:var(--r); padding:14px; margin-bottom:8px; cursor:pointer;
+  transition:border-color 0.15s;
+}
+.note-i.on { border-color:var(--acc); background:rgba(200,149,90,0.06); }
+.note-i:active { border-color:var(--acc); }
+.note-ititle { font-size:15px; font-weight:700; margin-bottom:4px; }
+.note-iprev { font-size:12px; color:var(--t3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.note-idate { font-size:11px; color:var(--t3); margin-top:5px; }
+.note-edit {
+  background:var(--s1); border:1px solid var(--border);
+  border-radius:var(--r); padding:18px; margin-top:10px;
+}
+.ne-title {
+  background:transparent; border:none; outline:none;
+  font-family:inherit; font-size:20px; font-weight:800;
+  color:var(--t1); width:100%; margin-bottom:12px;
+}
+.ne-body {
+  background:transparent; border:none; outline:none;
+  font-family:inherit; font-size:14px; color:var(--t2);
+  width:100%; min-height:200px; resize:none; line-height:1.8;
+}
+
+/* ── Modal ── */
+.mo {
+  position:fixed; inset:0; background:rgba(0,0,0,0.8);
+  backdrop-filter:blur(8px); z-index:100;
+  display:flex; align-items:flex-end; justify-content:center;
+  opacity:0; pointer-events:none; transition:opacity 0.22s;
+}
+.mo.on { opacity:1; pointer-events:all; }
+.modal {
+  background:var(--s1); border:1px solid var(--border);
+  border-radius:20px 20px 0 0; padding:22px 20px calc(32px + env(safe-area-inset-bottom,0px));
+  width:100%; max-width:480px;
+  transform:translateY(80px); transition:transform 0.28s cubic-bezier(.32,.72,0,1);
+  max-height:88vh; overflow-y:auto;
+}
+.mo.on .modal { transform:translateY(0); }
+.mhandle { width:38px; height:4px; background:var(--border2); border-radius:2px; margin:0 auto 18px; }
+.mtitle { font-size:18px; font-weight:800; margin-bottom:18px; }
+
+.fg { margin-bottom:15px; }
+.fl { font-size:11px; font-weight:800; color:var(--t3); margin-bottom:7px; display:block; letter-spacing:0.6px; text-transform:uppercase; }
+.fi {
+  width:100%; background:var(--s2); border:1px solid var(--border);
+  border-radius:var(--rs); padding:12px 14px;
+  font-family:inherit; font-size:15px; color:var(--t1);
+  outline:none; transition:border-color 0.18s;
+  -webkit-appearance:none; appearance:none;
+}
+.fi:focus { border-color:var(--acc); }
+select.fi { background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235e5040' stroke-width='2' fill='none'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:left 12px center; padding-left:32px; }
+.frow { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+
+.mbtns { display:flex; gap:10px; margin-top:18px; }
+.mbtn-c {
+  flex:1; padding:13px; border-radius:var(--rs);
+  border:1px solid var(--border); background:var(--s2);
+  color:var(--t2); font-family:inherit; font-size:15px; font-weight:700; cursor:pointer;
+}
+.mbtn-ok {
+  flex:2; padding:13px; border-radius:var(--rs); border:none;
+  background:var(--acc); color:#fff; font-family:inherit;
+  font-size:15px; font-weight:800; cursor:pointer;
+  box-shadow:0 3px 14px rgba(200,149,90,0.4);
+  transition:background 0.18s;
+}
+.mbtn-ok:active { background:var(--acc2); }
+
+/* Priority buttons */
+.pbtns { display:flex; gap:8px; }
+.pbtn {
+  flex:1; padding:10px 4px; border-radius:var(--rs);
+  border:2px solid var(--border); background:var(--s2);
+  font-family:inherit; font-size:13px; font-weight:700; color:var(--t2); cursor:pointer;
+  text-align:center; transition:all 0.15s;
+}
+.pbtn.ph { border-color:var(--red); color:var(--red); background:rgba(200,96,96,0.1); }
+.pbtn.pm { border-color:var(--ryellow); color:var(--ryellow); background:rgba(200,165,88,0.1); }
+.pbtn.pl { border-color:var(--green); color:var(--green); background:rgba(106,176,106,0.1); }
+
+/* ── Empty ── */
+.empty { text-align:center; color:var(--t3); padding:30px 0; }
+.empty-i { font-size:34px; margin-bottom:8px; }
+.empty-t { font-size:13px; font-weight:500; }
+
+/* ── Category colors ── */
+.cw { background:rgba(123,163,200,0.15); color:var(--cwork); }
+.cp { background:rgba(200,123,138,0.15); color:var(--cpers); }
+.ch { background:rgba(122,184,122,0.15); color:var(--chealth); }
+.cf { background:rgba(200,165,88,0.15); color:var(--cfin); }
+.cl { background:rgba(200,122,88,0.15); color:var(--clearn); }
+
+.dw { background:var(--cwork); }
+.dp { background:var(--cpers); }
+.dh { background:var(--chealth); }
+.df { background:var(--cfin); }
+.dl { background:var(--clearn); }
+
+/* scrollbar */
+::-webkit-scrollbar { width:3px; }
+::-webkit-scrollbar-thumb { background:var(--s4); border-radius:2px; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="tb">
+    <div class="tb-left">
+      <div class="tb-title" id="tb-t">היום שלי</div>
+      <div class="tb-sub" id="tb-s"></div>
+    </div>
+    <button class="tb-add" id="tb-add" onclick="onAdd()">+</button>
+  </div>
+
+  <div class="content" id="cnt">
+
+    <!-- TODAY -->
+    <div id="v-today" class="view on">
+      <div class="greet"><span class="greet-icon" id="g-icon">🌅</span><span id="g-txt">שלום!</span></div>
+      <div class="stats" id="stats"></div>
+      <div class="card">
+        <div class="card-hd"><div class="card-ttl">לוח זמנים היום</div></div>
+        <div id="t-tl"></div>
+      </div>
+      <div class="card">
+        <div class="card-hd">
+          <div class="card-ttl">משימות להיום</div>
+          <span class="card-link" onclick="sv('tasks')">הכל ›</span>
+        </div>
+        <div id="t-tasks"></div>
+      </div>
+      <div class="card">
+        <div class="card-hd">
+          <div class="card-ttl">הרגלים</div>
+          <span class="card-link" onclick="sv('habits')">הכל ›</span>
+        </div>
+        <div id="t-habits"></div>
+      </div>
+    </div>
+
+    <!-- CALENDAR -->
+    <div id="v-calendar" class="view">
+      <div class="card">
+        <div class="cal-nav-row">
+          <button class="cal-btn" onclick="chM(-1)">‹</button>
+          <div class="cal-m" id="cal-m"></div>
+          <button class="cal-btn" onclick="chM(1)">›</button>
+        </div>
+        <div class="cal-grid" id="cal-g"></div>
+      </div>
+      <div id="cal-evs"></div>
+    </div>
+
+    <!-- TASKS -->
+    <div id="v-tasks" class="view">
+      <div class="qbar">
+        <span style="font-size:17px">✍️</span>
+        <input class="qi" id="qi" placeholder="הוסף משימה מהירה..." onkeydown="qA(event)">
+      </div>
+      <div class="chips" id="chips"></div>
+      <div id="t-list"></div>
+    </div>
+
+    <!-- HABITS -->
+    <div id="v-habits" class="view">
+      <div id="h-list"></div>
+    </div>
+
+    <!-- GOALS -->
+    <div id="v-goals" class="view">
+      <div id="g-list"></div>
+    </div>
+
+    <!-- NOTES -->
+    <div id="v-notes" class="view">
+      <div id="n-list"></div>
+      <div id="n-edit" style="display:none">
+        <div class="note-edit">
+          <input class="ne-title" id="ne-t" placeholder="כותרת..." oninput="snote()">
+          <div style="border-bottom:1px solid var(--border);margin-bottom:12px"></div>
+          <textarea class="ne-body" id="ne-b" placeholder="כתוב כאן..." oninput="snote()"></textarea>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <nav class="nav">
+    <button class="ni on" id="ni-today" onclick="sv('today')">
+      <span class="ni-ico">🌅</span><span class="ni-lbl">היום</span>
+    </button>
+    <button class="ni" id="ni-calendar" onclick="sv('calendar')">
+      <span class="ni-ico">📅</span><span class="ni-lbl">יומן</span>
+    </button>
+    <button class="ni" id="ni-tasks" onclick="sv('tasks')">
+      <span class="ni-ico">✅</span><span class="ni-lbl">משימות</span>
+    </button>
+    <button class="ni" id="ni-habits" onclick="sv('habits')">
+      <span class="ni-ico">🔥</span><span class="ni-lbl">הרגלים</span>
+    </button>
+    <button class="ni" id="ni-goals" onclick="sv('goals')">
+      <span class="ni-ico">🎯</span><span class="ni-lbl">יעדים</span>
+    </button>
+    <button class="ni" id="ni-notes" onclick="sv('notes')">
+      <span class="ni-ico">📝</span><span class="ni-lbl">הערות</span>
+    </button>
+  </nav>
+</div>
+
+<!-- Modal -->
+<div class="mo" id="mo" onclick="cmo(event)">
+  <div class="modal">
+    <div class="mhandle"></div>
+    <div class="mtitle" id="m-t"></div>
+    <div id="m-b"></div>
+    <div class="mbtns">
+      <button class="mbtn-c" onclick="closeM()">ביטול</button>
+      <button class="mbtn-ok" onclick="saveM()">שמור ✓</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Clear data from older versions to start fresh
+['pt2','pe2','ph2','pg2','pn2','pid2'].forEach(k => localStorage.removeItem(k));
+
+// ─── Data ───
+const D = new Date();
+const T = ds(D);
+
+function ld(k,d){ try{ return JSON.parse(localStorage.getItem(k))||d; }catch{ return d; } }
+function sv2(k,v){ localStorage.setItem(k,JSON.stringify(v)); }
+
+let tasks  = ld('pt3',[]);
+let events = ld('pe3',[]);
+let habits = ld('ph3',[]);
+let goals  = ld('pg3',[]);
+let notes  = ld('pn3',[]);
+let idc = ld('pid3',300);
+let curV='today', calD=new Date(D), selD=T, filt='all', curN=null, curM=null;
+function nid(){ idc++; sv2('pid3',idc); return idc; }
+
+// ─── Navigation ───
+const titles={today:'היום שלי',calendar:'לוח שנה',tasks:'משימות',habits:'הרגלים',goals:'יעדים',notes:'הערות'};
+function sv(name){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));
+  document.getElementById('v-'+name).classList.add('on');
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
+  document.getElementById('ni-'+name).classList.add('on');
+  document.getElementById('tb-t').textContent=titles[name];
+  curV=name; render();
+}
+
+function onAdd(){
+  const map={today:'task',calendar:'event',tasks:'task',habits:'habit',goals:'goal',notes:'_note'};
+  const t=map[curV]||'task';
+  if(t==='_note'){ newNote(); return; }
+  openM(t);
+}
+
+// ─── Render ───
+function render(){
+  if(curV==='today')    rToday();
+  if(curV==='calendar') rCal();
+  if(curV==='tasks')    rTasks();
+  if(curV==='habits')   rHabits();
+  if(curV==='goals')    rGoals();
+  if(curV==='notes')    rNotes();
+}
+
+// Today
+function rToday(){
+  const h=D.getHours();
+  const icons=['🌙','🌙','🌙','🌙','🌙','🌙','☀️','☀️','☀️','☀️','☀️','☀️','🌤','🌤','🌤','🌤','🌤','🌅','🌙','🌙','🌙','🌙','🌙','🌙'];
+  const greets=['לילה טוב','לילה טוב','לילה טוב','לילה טוב','לילה טוב','לילה טוב','בוקר טוב','בוקר טוב','בוקר טוב','בוקר טוב','בוקר טוב','בוקר טוב','צהריים טובים','צהריים טובים','צהריים טובים','צהריים טובים','צהריים טובים','ערב טוב','ערב טוב','ערב טוב','ערב טוב','ערב טוב','לילה טוב','לילה טוב'];
+  document.getElementById('g-icon').textContent=icons[h];
+  document.getElementById('g-txt').textContent=greets[h]+'!';
+  document.getElementById('tb-s').textContent=fmtHe(D);
+
+  const tt=tasks.filter(t=>t.date===T);
+  const done=tt.filter(t=>t.done).length;
+  const evCnt=events.filter(e=>e.date===T).length;
+  const hDone=habits.filter(h=>h.log.includes(T)).length;
+  document.getElementById('stats').innerHTML=`
+    <div class="stat"><div class="stat-n" style="color:var(--green)">${done}/${tt.length}</div><div class="stat-l">משימות</div></div>
+    <div class="stat"><div class="stat-n" style="color:var(--cwork)">${evCnt}</div><div class="stat-l">אירועים</div></div>
+    <div class="stat"><div class="stat-n" style="color:var(--acc2)">${hDone}/${habits.length}</div><div class="stat-l">הרגלים</div></div>`;
+
+  const evs=events.filter(e=>e.date===T).sort((a,b)=>a.time.localeCompare(b.time));
+  document.getElementById('t-tl').innerHTML = evs.length ? `<div class="tl">${evs.map(e=>`
+    <div class="tl-row">
+      <div class="tl-time">${e.time}</div>
+      <div class="tl-dot d${cc(e.cat)}"></div>
+      <div class="tl-info">
+        <div class="tl-name">${e.title}</div>
+        ${e.desc?`<div class="tl-desc">${e.desc}</div>`:''}
+      </div>
+      <div class="tl-badge c${cc(e.cat)}">${cL(e.cat)}</div>
+    </div>`).join('')}</div>` : empty('📭','אין אירועים היום');
+
+  const todT=tasks.filter(t=>t.date===T).slice(0,5);
+  document.getElementById('t-tasks').innerHTML = todT.length ? todT.map(t=>`
+    <div class="tr ${t.done?'done':''}" onclick="togT(${t.id})">
+      <div class="chk ${t.done?'on':''}"></div>
+      <div class="tr-name">${t.title}</div>
+      <div class="tr-prio" style="background:${pC(t.prio)}"></div>
+    </div>`).join('') : empty('🎉','אין משימות פתוחות!');
+
+  document.getElementById('t-habits').innerHTML = habits.map(h=>{
+    const dn=h.log.includes(T);
+    return `<div class="tr ${dn?'done':''}" onclick="togH(${h.id})">
+      <div class="chk ${dn?'on':''}"></div>
+      <div style="font-size:17px;flex-shrink:0">${h.emoji}</div>
+      <div class="tr-name">${h.name}</div>
+      <span style="font-size:11px;color:var(--acc2);font-weight:700">🔥${h.streak}</span>
+    </div>`;
+  }).join('');
+}
+
+// Calendar
+function rCal(){
+  const months=['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
+  const wd=['א','ב','ג','ד','ה','ו','ש'];
+  document.getElementById('cal-m').textContent=`${months[calD.getMonth()]} ${calD.getFullYear()}`;
+  const first=new Date(calD.getFullYear(),calD.getMonth(),1);
+  const last=new Date(calD.getFullYear(),calD.getMonth()+1,0);
+  let cells=[];
+  for(let i=0;i<first.getDay();i++){ const d=new Date(first); d.setDate(d.getDate()-(first.getDay()-i)); cells.push({d,o:true}); }
+  for(let i=1;i<=last.getDate();i++) cells.push({d:new Date(calD.getFullYear(),calD.getMonth(),i),o:false});
+  while(cells.length%7){ const d=new Date(cells[cells.length-1].d); d.setDate(d.getDate()+1); cells.push({d,o:true}); }
+  document.getElementById('cal-g').innerHTML=
+    wd.map(w=>`<div class="cal-dn">${w}</div>`).join('')+
+    cells.map(c=>{
+      const s=ds(c.d),isT=s===T,isSel=s===selD;
+      const dots=events.filter(e=>e.date===s).slice(0,3).map(e=>`<div class="cdot d${cc(e.cat)}"></div>`).join('');
+      return `<div class="cal-d${c.o?' o':''}${isT&&!isSel?' t':''}${isSel?' s':''}" onclick="selC('${s}')">
+        ${c.d.getDate()}${dots?`<div class="cdots">${dots}</div>`:''}
+      </div>`;
+    }).join('');
+  rCalEvs();
+}
+function selC(s){ selD=s; rCal(); }
+function chM(d){ calD=new Date(calD.getFullYear(),calD.getMonth()+d,1); rCal(); }
+function rCalEvs(){
+  const evs=events.filter(e=>e.date===selD).sort((a,b)=>a.time.localeCompare(b.time));
+  document.getElementById('cal-evs').innerHTML=`
+    <div style="font-size:13px;font-weight:700;color:var(--t2);margin:12px 0 8px">${selD===T?'אירועי היום':fmtShort(new Date(selD+'T12:00'))}</div>
+    ${evs.length?evs.map(e=>`
+      <div class="card" style="margin-bottom:7px">
+        <div class="tl-row" style="padding:0">
+          <div class="tl-time">${e.time}</div>
+          <div class="tl-dot d${cc(e.cat)}"></div>
+          <div class="tl-info"><div class="tl-name">${e.title}</div>${e.desc?`<div class="tl-desc">${e.desc}</div>`:''}</div>
+          <button class="tf-del" onclick="delEv(${e.id})">×</button>
+        </div>
+      </div>`).join('') : empty('📭','אין אירועים ביום זה')}`;
+}
+
+// Tasks
+function rTasks(){
+  const fs=[{k:'all',l:'הכל'},{k:'today',l:'היום'},{k:'pending',l:'פתוח'},{k:'done',l:'הושלם'},{k:'high',l:'🔴 דחוף'},{k:'work',l:'עבודה'},{k:'personal',l:'אישי'},{k:'health',l:'בריאות'}];
+  document.getElementById('chips').innerHTML=fs.map(f=>`<div class="chip${filt===f.k?' on':''}" onclick="setF('${f.k}')">${f.l}</div>`).join('');
+  let t=[...tasks];
+  if(filt==='today') t=t.filter(x=>x.date===T);
+  else if(filt==='pending') t=t.filter(x=>!x.done);
+  else if(filt==='done') t=t.filter(x=>x.done);
+  else if(filt==='high') t=t.filter(x=>x.prio==='high');
+  else if(['work','personal','health','finance','learn'].includes(filt)) t=t.filter(x=>x.cat===filt);
+  t.sort((a,b)=>{ if(a.done!==b.done)return a.done?1:-1; const p={high:0,med:1,low:2}; return (p[a.prio]||1)-(p[b.prio]||1); });
+  document.getElementById('t-list').innerHTML=t.length?t.map(x=>`
+    <div class="tf ${x.done?'done':''}">
+      <div class="chk ${x.done?'on':''}" onclick="togT(${x.id})"></div>
+      <div class="tf-name">${x.title}</div>
+      <div class="tf-meta">
+        <div style="width:7px;height:7px;border-radius:50%;background:${pC(x.prio)}"></div>
+        <span class="tf-tag c${cc(x.cat)}">${cL(x.cat)}</span>
+      </div>
+      <button class="tf-del" onclick="delT(${x.id})">×</button>
+    </div>`).join(''):empty('🎯','אין משימות כאן');
+}
+function setF(f){ filt=f; rTasks(); }
+function qA(e){
+  if(e.key!=='Enter') return;
+  const v=document.getElementById('qi').value.trim();
+  if(!v) return;
+  tasks.push({id:nid(),title:v,cat:'personal',prio:'med',done:false,date:T});
+  sv2('pt3',tasks); document.getElementById('qi').value=''; rTasks();
+}
+
+// Habits
+function rHabits(){
+  const wd=['א','ב','ג','ד','ה','ו','ש'];
+  const l7=Array.from({length:7},(_,i)=>{ const d=new Date(D); d.setDate(d.getDate()-6+i); return {d,s:ds(d)}; });
+  document.getElementById('h-list').innerHTML=habits.length?habits.map(h=>{
+    const dn=h.log.includes(T);
+    return `<div class="hcard ${dn?'dn':''}">
+      <div class="hcard-emo" onclick="togH(${h.id})">${h.emoji}</div>
+      <div class="hcard-info" onclick="togH(${h.id})">
+        <div class="hcard-name">${h.name}</div>
+        <div class="hcard-streak">רצף: <b>${h.streak} ימים 🔥</b></div>
+        <div class="hdays">
+          ${l7.map(x=>`<div class="hday${h.log.includes(x.s)?' dn':''}${x.s===T?' td':''}">${wd[x.d.getDay()]}</div>`).join('')}
+        </div>
+      </div>
+      <button class="tf-del" onclick="delH(${h.id})" style="font-size:22px;align-self:flex-start;color:var(--t3)">×</button>
+    </div>`;
+  }).join(''):empty('🌱','הוסף הרגל ראשון');
+}
+
+// Goals
+function rGoals(){
+  const cc2={health:'var(--chealth)',finance:'var(--cfin)',learn:'var(--clearn)',work:'var(--cwork)',personal:'var(--cpers)'};
+  document.getElementById('g-list').innerHTML=goals.length?goals.map(g=>`
+    <div class="gcard">
+      <div class="gcard-top">
+        <div class="gcard-emo">${g.emoji}</div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="gcard-pct">${g.prog}%</div>
+          <button class="tf-del" onclick="delG(${g.id})" style="font-size:22px;color:var(--t3)">×</button>
+        </div>
+      </div>
+      <div class="gcard-title">${g.title}</div>
+      <div class="gcard-sub">${g.sub}</div>
+      <div class="prog"><div class="prog-f" style="width:${g.prog}%;background:${cc2[g.cat]||'var(--acc)'}"></div></div>
+    </div>`).join(''):empty('🎯','הגדר יעד ראשון');
+}
+
+// Notes
+let nTimer;
+function rNotes(){
+  document.getElementById('n-list').innerHTML=notes.map(n=>`
+    <div class="note-i ${n.id===curN?'on':''}" onclick="selN(${n.id})">
+      <div class="note-ititle">${n.title||'ללא כותרת'}</div>
+      <div class="note-iprev">${n.body?.substring(0,60)||''}</div>
+      <div class="note-idate">${n.upd}</div>
+    </div>`).join('');
+  const ne=document.getElementById('n-edit');
+  if(curN){ const n=notes.find(x=>x.id===curN); if(n){ ne.style.display='block'; document.getElementById('ne-t').value=n.title||''; document.getElementById('ne-b').value=n.body||''; } }
+  else ne.style.display='none';
+}
+function selN(id){ curN=id; rNotes(); }
+function newNote(){ const n={id:nid(),title:'',body:'',upd:T}; notes.unshift(n); curN=n.id; sv2('pn3',notes); rNotes(); setTimeout(()=>document.getElementById('ne-t').focus(),60); }
+function snote(){ clearTimeout(nTimer); nTimer=setTimeout(()=>{ const n=notes.find(x=>x.id===curN); if(!n)return; n.title=document.getElementById('ne-t').value; n.body=document.getElementById('ne-b').value; n.upd=T; sv2('pn3',notes); rNotes(); },700); }
+
+// ─── Toggle / Delete ───
+function togT(id){ const t=tasks.find(x=>x.id===id); if(t){ t.done=!t.done; sv2('pt3',tasks); render(); } }
+function delT(id){ tasks=tasks.filter(x=>x.id!==id); sv2('pt3',tasks); render(); }
+function delEv(id){ events=events.filter(x=>x.id!==id); sv2('pe3',events); render(); }
+function delH(id){ habits=habits.filter(x=>x.id!==id); sv2('ph3',habits); render(); }
+function delG(id){ goals=goals.filter(x=>x.id!==id); sv2('pg3',goals); render(); }
+function togH(id){ const h=habits.find(x=>x.id===id); if(!h)return; const i=h.log.indexOf(T); if(i>=0){h.log.splice(i,1);h.streak=Math.max(0,h.streak-1);}else{h.log.push(T);h.streak++;} sv2('ph3',habits); render(); }
+
+// ─── Modal ───
+function openM(type){
+  curM=type;
+  const ts={task:'משימה חדשה',event:'אירוע חדש',goal:'יעד חדש',habit:'הרגל חדש'};
+  document.getElementById('m-t').textContent=ts[type]||'חדש';
+  document.getElementById('m-b').innerHTML=mBody(type);
+  document.getElementById('mo').classList.add('on');
+}
+function mBody(t){
+  if(t==='task') return `
+    <div class="fg"><label class="fl">כותרת המשימה</label><input class="fi" id="mi-title" placeholder="מה צריך לעשות?" autofocus></div>
+    <div class="frow">
+      <div class="fg"><label class="fl">תאריך</label><input class="fi" id="mi-date" type="date" value="${T}"></div>
+      <div class="fg"><label class="fl">קטגוריה</label>
+        <select class="fi" id="mi-cat"><option value="work">עבודה</option><option value="personal">אישי</option><option value="health">בריאות</option><option value="finance">כספים</option><option value="learn">לימודים</option></select>
+      </div>
+    </div>
+    <div class="fg"><label class="fl">עדיפות</label>
+      <div class="pbtns">
+        <button class="pbtn" onclick="sprio(this,'high')">🔴 דחוף</button>
+        <button class="pbtn pm" onclick="sprio(this,'med')">🟡 בינוני</button>
+        <button class="pbtn" onclick="sprio(this,'low')">🟢 נמוך</button>
+      </div>
+      <input type="hidden" id="mi-prio" value="med">
+    </div>`;
+  if(t==='event') return `
+    <div class="fg"><label class="fl">שם האירוע</label><input class="fi" id="mi-title" placeholder="מה קורה?" autofocus></div>
+    <div class="frow">
+      <div class="fg"><label class="fl">תאריך</label><input class="fi" id="mi-date" type="date" value="${selD||T}"></div>
+      <div class="fg"><label class="fl">שעה</label><input class="fi" id="mi-time" type="time" value="10:00"></div>
+    </div>
+    <div class="frow">
+      <div class="fg"><label class="fl">קטגוריה</label>
+        <select class="fi" id="mi-cat"><option value="work">עבודה</option><option value="personal">אישי</option><option value="health">בריאות</option><option value="finance">כספים</option></select>
+      </div>
+      <div class="fg"><label class="fl">מיקום / הערה</label><input class="fi" id="mi-desc" placeholder="פרטים..."></div>
+    </div>`;
+  if(t==='goal') return `
+    <div class="fg"><label class="fl">שם היעד</label><input class="fi" id="mi-title" placeholder="לאן רוצה להגיע?" autofocus></div>
+    <div class="fg"><label class="fl">תיאור</label><input class="fi" id="mi-sub" placeholder="פרט..."></div>
+    <div class="frow">
+      <div class="fg"><label class="fl">אימוג'י</label><input class="fi" id="mi-emoji" placeholder="🎯" maxlength="2"></div>
+      <div class="fg"><label class="fl">קטגוריה</label>
+        <select class="fi" id="mi-cat"><option value="health">בריאות</option><option value="finance">כספים</option><option value="learn">לימודים</option><option value="work">עבודה</option><option value="personal">אישי</option></select>
+      </div>
+    </div>
+    <div class="fg"><label class="fl">התקדמות %</label><input class="fi" id="mi-prog" type="number" min="0" max="100" value="0"></div>`;
+  if(t==='habit') return `
+    <div class="fg"><label class="fl">שם ההרגל</label><input class="fi" id="mi-title" placeholder="איזה הרגל לטפח?" autofocus></div>
+    <div class="fg"><label class="fl">אימוג'י</label><input class="fi" id="mi-emoji" placeholder="🌱" maxlength="2"></div>`;
+  return '';
+}
+function sprio(el,v){
+  document.querySelectorAll('.pbtn').forEach(b=>b.className='pbtn');
+  el.className=`pbtn p${v[0]}`;
+  document.getElementById('mi-prio').value=v;
+}
+function saveM(){
+  const title=document.getElementById('mi-title')?.value.trim();
+  if(!title) return;
+  if(curM==='task'){
+    tasks.push({id:nid(),title,cat:document.getElementById('mi-cat').value,prio:document.getElementById('mi-prio').value,done:false,date:document.getElementById('mi-date').value});
+    sv2('pt3',tasks);
+  } else if(curM==='event'){
+    events.push({id:nid(),title,time:document.getElementById('mi-time').value,date:document.getElementById('mi-date').value,cat:document.getElementById('mi-cat').value,desc:document.getElementById('mi-desc')?.value||''});
+    sv2('pe3',events);
+  } else if(curM==='goal'){
+    goals.push({id:nid(),title,sub:document.getElementById('mi-sub')?.value||'',emoji:document.getElementById('mi-emoji')?.value||'🎯',cat:document.getElementById('mi-cat').value,prog:parseInt(document.getElementById('mi-prog')?.value)||0});
+    sv2('pg3',goals);
+  } else if(curM==='habit'){
+    habits.push({id:nid(),name:title,emoji:document.getElementById('mi-emoji')?.value||'🌱',streak:0,log:[]});
+    sv2('ph3',habits);
+  }
+  closeM(); render();
+}
+function closeM(){ document.getElementById('mo').classList.remove('on'); }
+function cmo(e){ if(e.target.id==='mo') closeM(); }
+
+// ─── Helpers ───
+function ds(d){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+function fmtHe(d){
+  const days=['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
+  const months=['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
+  return `יום ${days[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]}`;
+}
+function fmtShort(d){ return `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`; }
+function cL(c){ return {work:'עבודה',personal:'אישי',health:'בריאות',finance:'כספים',learn:'לימודים'}[c]||c; }
+function pC(p){ return {high:'var(--red)',med:'var(--ryellow)',low:'var(--green)'}[p]||'var(--t3)'; }
+function cc(c){ return {work:'w',personal:'p',health:'h',finance:'f',learn:'l'}[c]||'w'; }
+function empty(i,t){ return `<div class="empty"><div class="empty-i">${i}</div><div class="empty-t">${t}</div></div>`; }
+
+// ─── Init ───
+render();
+
+// Register SW
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+</script>
+</body>
+</html>
